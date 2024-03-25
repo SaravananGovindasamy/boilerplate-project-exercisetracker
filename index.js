@@ -26,7 +26,6 @@ const userSchema = new Schema({
 });
 
 const User = mongoose.model('User', userSchema);
-
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html');
 });
@@ -47,10 +46,14 @@ app.post('/api/users', (req, res) => {
 
 // Get the details of the user or list of users
 app.get('/api/users', (req, res) => {
-  User.find({}, (err, data) => {
-    if (err) return console.error(err);
-    res.json(data.map(user => ({ username: user.username, _id: user._id })));
-  });
+  User.find({}).select('username _id').exec()
+  .then(data => {
+    res.json(data);
+  })
+  .catch(err => {
+    console.error(err);
+    res.status(500).json({ error: 'An error occurred while fetching users.' });
+  })
 });
 
 // Adding exercise details to the user
@@ -73,8 +76,8 @@ app.post('/api/users/:_id/exercises', (req, res) => {
 app.get('/api/users/:_id/logs', (req, res) => {
   const userId = req.params._id;
   const { from, to, limit } = req.query;
-  User.findById(userId, (err, data) => {
-    if (err) return console.error(err);
+  User.findById(userId).exec()
+  .then(data => {
     let log = data.log;
     if (from) {
       log = log.filter(exercise => new Date(exercise.date) >= new Date(from));
@@ -86,6 +89,10 @@ app.get('/api/users/:_id/logs', (req, res) => {
       log = log.slice(0, parseInt(limit));
     }
     res.json({ username: data.username, _id: data._id, count: log.length, log });
+  })
+  .catch(err => {
+    console.error(err);
+    res.status(500).json({ error: 'An error occurred while fetching user by ID.' });
   });
 });
 
