@@ -93,11 +93,12 @@ app.get('/api/users/:_id/logs', (req, res) => {
     const formattedLog = log.map(exercise => {
       const dateUpdate = new Date(exercise.date).toDateString();
       return {
-        ...exercise,
+        description: exercise.description,
+        duration: exercise.duration,
         date: dateUpdate
       };
     });
-
+    console.log("Formatted log:", formattedLog); // Debugging statement
     // Then pass the formattedLog to res.json
     res.json({ username: data.username, count: log.length, _id: data._id, log: formattedLog });
   })
