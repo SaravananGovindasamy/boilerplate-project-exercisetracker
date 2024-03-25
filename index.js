@@ -79,6 +79,7 @@ app.get('/api/users/:_id/logs', (req, res) => {
   User.findById(userId).exec()
   .then(data => {
     let log = data.log;
+    console.log("Original log:", log); // Debugging statement
     if (from) {
       log = log.filter(exercise => new Date(exercise.date) >= new Date(from));
     }
@@ -88,11 +89,17 @@ app.get('/api/users/:_id/logs', (req, res) => {
     if (limit) {
       log = log.slice(0, parseInt(limit));
     }
-    // Converting date objects to strings
-    log.forEach(exercise => {
-      exercise.date = new Date(exercise.date).toDateString();
+    // Convert date objects to strings using dateString format
+    const formattedLog = log.map(exercise => {
+      const dateUpdate = new Date(exercise.date).toDateString();
+      return {
+        ...exercise,
+        date: dateUpdate
+      };
     });
-    res.json({ username: data.username, _id: data._id, count: log.length, log });
+
+    // Then pass the formattedLog to res.json
+    res.json({ username: data.username, count: log.length, _id: data._id, log: formattedLog });
   })
   .catch(err => {
     console.error(err);
