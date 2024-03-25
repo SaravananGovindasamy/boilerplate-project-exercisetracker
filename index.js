@@ -88,6 +88,10 @@ app.get('/api/users/:_id/logs', (req, res) => {
     if (limit) {
       log = log.slice(0, parseInt(limit));
     }
+    // Converting date objects to strings
+    log.forEach(exercise => {
+      exercise.date = new Date(exercise.date).toDateString();
+    });
     res.json({ username: data.username, _id: data._id, count: log.length, log });
   })
   .catch(err => {
